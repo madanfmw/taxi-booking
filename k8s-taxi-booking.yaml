@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: taxi-booking-deployment
+  labels:
+    app: taxi-booking
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: taxi-booking
+  template:
+    metadata:
+      labels:
+        app: taxi-booking
+    spec:
+      containers:
+      - name: taxi-booking-container
+        image: maraboyinimadan/unreal-engines:9745f8c
+        ports:
+        - containerPort: 9000
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+        readinessProbe:
+          httpGet:
+            path: "/"
+            port: 9000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: "/"
+            port: 9000
+          initialDelaySeconds: 15
+          periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: taxi-booking-service
+  labels:
+    app: taxi-booking
+spec:
+  selector:
+    app: taxi-booking
+  ports:
+  - protocol: TCP
+    port: 9000
+    targetPort: 9000
+  type: LoadBalancer
